@@ -1,0 +1,10 @@
+# Jupyter Checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
