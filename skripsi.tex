@@ -1,0 +1,709 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\textbf{ANALISIS PENURUNAN TEKANAN DAN TRANSFER KALOR \emph{HEAT PIPE}
+DI REAKTOR ANTARIKSA MENGGUNAKAN PYTHON}
+
+\textbf{SKRIPSI}
+
+untuk memenuhi sebagian persyaratan
+
+untuk memperoleh derajat Sarjana
+
+Program Studi Teknik Nuklir
+
+Diajukan oleh
+
+MUHAMMAD NAUFAL TAMIMI
+
+20/456315/TK/50445
+
+Kepada
+
+\textbf{DEPARTEMEN TEKNIK NUKLIR DAN TEKNIK FISIKA}
+
+\textbf{FAKULTAS TEKNIK}
+
+\textbf{UNIVERSITAS GADJAH MADA}
+
+\textbf{YOGYAKARTA}
+
+\textbf{2026}
+
+\emph{\ldots Karya ini kupersembahkan untuk keluarga dan teman-teman
+yang menemaniku\ldots{}}
+
+\section{\texorpdfstring{\textbf{BAB I}
+\textbf{PENDAHULUAN}}{BAB I PENDAHULUAN}}\label{bab-i-pendahuluan}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item ~
+  \subsection{\texorpdfstring{\textbf{Latar
+  Belakang}}{Latar Belakang}}\label{latar-belakang}
+\end{enumerate}
+
+Eksplorasi antariksa yang semakin masif, baik untuk misi penjelajahan
+antariksa dalam maupun pembangunan pangkalan di bulan dan planet lain,
+membutuhkan sumber energi yang andal dan berkapasitas besar. Sumber daya
+konvensional seperti panel surya memiliki keterbatasan karena
+ketersediaan berselang dan kinerjanya yang menurun drastis saat berada
+jauh dari matahari, sedangkan \emph{Radioisotope Thermoelectric
+Generators} (RTG) yang menggunakan isotop seperti Plutonium-238 memiliki
+kendala pada daya keluaran yang relatif kecil, biasanya di bawah 500 W.
+Oleh karena itu, reaktor fisi nuklir antariksa, seperti proyek Kilopower
+yang dikembangkan oleh NASA, hadir sebagai solusi menjanjikan untuk
+mengisi kesenjangan kebutuhan daya antara 1 hingga 10 kWe (atau lebih)
+untuk misi jangka panjang
+\href{https://www.zotero.org/google-docs/?e7LRKG}{{[}1{]}}. Reaktor
+antariksa menawarkan kepadatan daya yang tinggi, sistem yang sangat
+kompak, serta kemampuan beroperasi secara terus-menerus hingga puluhan
+tahun tanpa bergantung pada kondisi lingkungan luar.
+
+Dalam merancang desain reaktor mikro antariksa, sistem pendingin dan
+transfer kalor yang efisien sekaligus aman merupakan tantangan teknis
+yang krusial. Pipa kalor (\emph{heat pipe}) logam alkali suhu tinggi,
+seperti yang menggunakan natrium cair, telah menjadi teknologi pemindah
+kalor pasif utama untuk aplikasi reaktor antariksa. Perangkat
+termodinamika tertutup ini beroperasi dengan memanfaatkan kalor laten
+penguapan dari fluida kerjanya untuk memindahkan jumlah energi kalor
+yang signifikan dengan gradien suhu yang sangat minimal. Proses aliran
+balik cairan murni digerakkan oleh tekanan kapiler yang dihasilkan di
+dalam struktur sumbu (\emph{wick}) berpori, sehingga menghilangkan
+kebutuhan akan pompa mekanis aktif. Pengoperasian pasif ini tidak hanya
+sangat andal, tetapi juga mencegah kemungkinan kegagalan komponen
+mekanik tunggal dan sangat ideal untuk beroperasi di lingkungan
+gravitasi mikro di luar angkasa
+\href{https://www.zotero.org/google-docs/?0U09MA}{{[}2{]}}.
+
+Meskipun memiliki efisiensi transfer kalor yang sangat tinggi, operasi
+pipa kalor sangat dibatasi oleh batasan-batasan fisik yang nonlinier.
+Batasan ini meliputi batas sonik saat aliran uap tercekik (\emph{choked
+flow}), batas \emph{entrainment} karena gesekan uap berkecepatan tinggi,
+batas viskositas pada saat suhu awal rendah, batas pendidihan
+(\emph{boiling limit}), dan batas kapiler. Secara khusus, batas kapiler
+sering kali menjadi pembatas utama kapasitas perpindahan kalor pada
+keadaan tunak (\emph{steady-state}); batas ini tercapai apabila tekanan
+kapiler tidak lagi mampu mengatasi total penurunan tekanan
+(\emph{pressure drop}) yang timbul dari aliran cairan di dalam sumbu,
+gesekan uap, dan gaya gravitasi. Apabila beban kalor atau tekanan
+hidrolik melebihi kemampuan desainnya, sirkulasi akan terputus dan pipa
+kalor akan mengalami kekeringan pada bagian evaporator (\emph{dryout}),
+yang berpotensi memicu lonjakan suhu ekstrem yang membahayakan inti
+reaktor \href{https://www.zotero.org/google-docs/?QjHnZM}{{[}3,
+p.~170-179{]}}.
+
+Mengingat kompleksitas operasi tersebut, diperlukan model komputasi yang
+tangguh bagi desainer termal-hidrolik untuk mengevaluasi parameter
+desain pipa kalor. Secara historis, analisis pipa kalor konvensional
+sering kali mengandalkan kode-kode lawas berbasis Fortran seperti HTPIPE
+dari Los Alamos National Laboratory, atau kode berskala rekayasa modern
+yang membutuhkan komputasi masif seperti Sockeye berbasis MOOSE. Akan
+tetapi, fleksibilitas bahasa pemrograman Python memberikan peluang untuk
+mengembangkan alat pemodelan komputasi yang mandiri
+(\emph{self-contained}), efisien, dan komprehensif. Melalui skrip
+Python, perhitungan distribusi tekanan, profil suhu uap, dan
+penyelesaian batas operasi fisik (\emph{operational limits}) dapat
+diprediksi secara otomatis, memungkinkan optimalisasi desain pipa kalor
+yang lebih terintegrasi untuk berbagai variasi reaktor antariksa
+
+Prototipe eksperimental Kilopower Reactor Using Stirling TechnologY
+(KRUSTY) telah secara sukses mendemonstrasikan keandalan pendinginan
+pipa kalor natrium pada uji daya penuh untuk reaktor antariksa. Konsep
+sukses ini dapat diaplikasikan dan dioptimalkan lebih lanjut pada
+desain-desain reaktor masa depan, termasuk desain konseptual Reaktor
+Antariksa Indonesia atau Indonesian Space Reactor (ISR) yang dirancang
+menggunakan spektrum cepat untuk menghasilkan daya 500 kWth secara
+kontinu. Konfigurasi pendinginan pasif pada ISR ditujukan untuk
+memastikan distribusi termal yang merata, memitigasi titik panas lokal,
+serta menjamin reaktor tetap kritis dan aman dari kegagalan mekanis.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\item ~
+  \subsection{\texorpdfstring{\textbf{Perumusan
+  Masalah}}{Perumusan Masalah}}\label{perumusan-masalah}
+\end{enumerate}
+
+Pipa kalor (\emph{heat pipe}) logam alkali suhu tinggi merupakan
+teknologi pendingin pasif utama yang krusial untuk aplikasi reaktor
+mikro terestrial maupun tenaga nuklir antariksa. Namun, operasi pipa
+kalor sangat dibatasi oleh lima batasan fisik yang ketat, yaitu batas
+sonik, batas viskos, batas kapiler, batas \emph{entrainment}, dan batas
+pendidihan. Jika beban termal melampaui batasan ini pada suhu operasi
+tertentu, pipa kalor akan gagal berfungsi, yang berujung pada lonjakan
+suhu secara cepat dan fenomena kekeringan pada evaporator (dryout).
+Secara historis, desainer termal-hidrolik sangat bergantung pada kode
+lawas berbasis Fortran (seperti HTPIPE) atau \emph{framework} modern
+yang membutuhkan komputasi masif (seperti Sockeye berbasis MOOSE) untuk
+menganalisis batas-batas ini. Di sisi lain, desain konseptual Reaktor
+Antariksa Indonesia (ISR) yang dirancang menghasilkan daya 500 kWth
+memerlukan sistem pendingin pasif yang tangguh agar terhindar dari titik
+panas lokal dan kegagalan komponen. Oleh karena itu, diperlukan sebuah
+alat pemodelan komputasi yang mandiri (\emph{self-contained}), efisien,
+dan presisi menggunakan bahasa pemrograman Python untuk menganalisis
+batasan kinerja tersebut sebelum diaplikasikan pada desain reaktor masa
+depan. Berdasarkan uraian tersebut, dapat disusun rumusan masalah
+penelitian sebagai berikut:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Bagaimana cara membangun dan mengembangkan model komputasi berbasis
+  bahasa pemrograman Python untuk memprediksi secara akurat penurunan
+  tekanan (pressure drop), profil transfer kalor, serta lima batas
+  operasional fisik (batas sonik, batas viskos, batas kapiler, batas
+  entrainment, dan batas pendidihan) pada pipa kalor logam alkali suhu
+  tinggi?
+\item
+  Seberapa akurat algoritma komputasi Python yang dikembangkan tersebut
+  apabila divalidasi terhadap data batas performa dan titik operasi
+  nominal (suhu 1000 K) dari pipa kalor natrium pada purwarupa
+  eksperimental \emph{Kilopower Reactor Using Stirling TechnologY}
+  (KRUSTY)?
+\item
+  Bagaimana cara mengaplikasikan model komputasi yang telah tervalidasi
+  untuk mengevaluasi kinerja dan mengoptimalkan desain konfigurasi pipa
+  kalor pada Reaktor Antariksa Indonesia (ISR)?
+\item ~
+  \subsection{\texorpdfstring{\textbf{Batasan
+  Masalah}}{Batasan Masalah}}\label{batasan-masalah}
+
+  Batasan masalah dari penelitian ini adalah sebagai berikut:
+\item
+  Pemodelan komputasi perpindahan kalor dan pressure drop dibatasi pada
+  kondisi tunak 1-Dimensi (1D \emph{steady-state}) dengan menggunakan
+  metode jaringan hambatan termal (\emph{thermal resistance network}).
+\item
+  Perhitungan komputasi difokuskan untuk menyelesaikan dan memprediksi
+  lima batas operasi utama pipa kalor, yaitu: batas sonik, batas viskos,
+  batas kapiler, batas \emph{entrainment}, dan batas pendidihan.
+\item
+  Fluida kerja pipa kalor yang dimodelkan adalah logam alkali, secara
+  spesifik menggunakan korelasi sifat termofisik natrium cair
+  (\emph{sodium}).
+\item
+  Validasi model komputasi dibatasi dengan menggunakan titik desain
+  fisik dan data eksperimen dasar dari proyek \emph{Kilopower Reactor
+  Using Stirling TechnologY} (KRUSTY) pada suhu operasi nominal 1000 K
+  (727 °C).
+\item
+  Aplikasi model ditekankan pada evaluasi konfigurasi pendinginan pasif
+  untuk desain konseptual Reaktor Antariksa Indonesia (ISR) yang
+  berspektrum cepat dengan daya 500 kWth.
+\item
+  \textbf{Tujuan Penelitian}
+
+  Tujuan dari penelitian ini adalah sebagai berikut:
+\item
+  Mengembangkan algoritma pemodelan komputasi berbasis Python yang
+  mandiri (\emph{self-contained}) untuk memetakan penurunan tekanan
+  (\emph{pressure drop}), transfer kalor, serta lima batas operasional
+  fisik pada pipa kalor logam alkali suhu tinggi.
+\item
+  Memvalidasi keakuratan alat komputasi Python yang dikembangkan dengan
+  membandingkannya terhadap batas performa dan profil operasi nominal
+  dari reaktor purwarupa KRUSTY.
+\item
+  Mengaplikasikan model komputasi yang telah tervalidasi untuk
+  mengevaluasi kinerja dan mengoptimalkan desain konfigurasi pipa kalor
+  pada Reaktor Antariksa Indonesia (ISR).
+\item ~
+  \subsection{\texorpdfstring{\textbf{Manfaat
+  Penelitian}}{Manfaat Penelitian}}\label{manfaat-penelitian}
+\item
+  Memberikan alternatif alat analisis termal-hidrolik berbasis Python
+  yang lebih mudah diakses, fleksibel, dan efisien untuk desain awal
+  (preliminer) pipa kalor, mengurangi kebergantungan pada kode komputasi
+  berat dan berbiaya tinggi.
+\item
+  Menghasilkan landasan evaluasi termal-hidrolik yang memastikan
+  distribusi panas yang kuat, mitigasi titik panas lokal (hotspots),
+  serta memastikan stabilitas aliran kapiler tanpa risiko dryout di
+  dalam teras ISR.
+\item
+  Berkontribusi dalam pengembangan sistem pendinginan pasif yang andal
+  dan aman (tanpa komponen bergerak seperti pompa mekanis), yang krusial
+  untuk kesuksesan dan umur panjang misi eksplorasi luar angkasa dengan
+  reaktor nuklir.
+\end{enumerate}
+
+\section{\texorpdfstring{\textbf{BAB II} \textbf{TINJAUAN
+PUSTAKA}}{BAB II TINJAUAN PUSTAKA}}\label{bab-ii-tinjauan-pustaka}
+
+Penelitian mengenai aplikasi reaktor nuklir antariksa yang didinginkan
+dengan pipa kalor telah mencapai tonggak sejarah penting melalui
+keberhasilan eksperimen Kilopower Reactor Using Stirling TechnologY
+(KRUSTY) yang diinisiasi oleh NASA dan National Nuclear Security
+Administration (NNSA). Proyek purwarupa ini ditujukan untuk menghasilkan
+daya listrik sebesar 1 hingga 10 kWe secara kontinu selama belasan tahun
+untuk kebutuhan misi luar angkasa. Pada uji coba daya penuh di tahun
+2018, KRUSTY berhasil beroperasi dengan memanfaatkan teras padat
+Uranium-235 yang memindahkan panas fisi sebesar kurang lebih 5,5 kWth
+menuju mesin konversi Stirling menggunakan jaringan pipa kalor natrium
+pasif. Keberhasilan eksperimen KRUSTY ini menjadikannya standar
+pembuktian (benchmark) yang paling mutakhir dan ideal untuk memvalidasi
+pemodelan reaktor antariksa, mengingat kemampuannya bertahan dalam
+berbagai kondisi kegagalan simulasi dan transien operasi
+
+Sementara itu, dari sisi pengembangan reaktor nasional, Khandaq dkk.
+telah mengusulkan studi desain konseptual teras Indonesian Space Reactor
+(ISR). ISR dirancang sebagai reaktor berspektrum neutron cepat dengan
+target keluaran panas sebesar 500 kWth untuk masa operasi lebih dari 10
+tahun. Teras reaktor ini berstruktur silinder heksagonal berongga yang
+terdiri atas 61 pin bahan bakar uranium nitrat (UN) dengan pengayaan
+U-235 sekitar 55\%. Pada gagasan aslinya, pin bahan bakar ISR didesain
+dalam bentuk anulus di mana fluida pendingin logam cair (Na-78K)
+mengalir secara aktif di dalamnya untuk meratakan distribusi panas
+radial. Literatur ini sangat esensial bagi penelitian skripsi ini karena
+memberikan referensi spesifikasi geometri dan beban termal yang akan
+dikonversi dan dievaluasi kinerjanya menggunakan konsep pendinginan
+pasif pipa kalor
+
+Dalam bidang pemodelan komputasional pipa kalor itu sendiri, terdapat
+berbagai perangkat lunak khusus yang telah dijadikan standar industri.
+Secara historis, desainer termal-hidrolik menggunakan kode lawas seperti
+ANLHTP buatan Argonne National Laboratory atau kode HTPIPE berbasis
+Fortran dari Los Alamos National Laboratory (LANL) yang difokuskan untuk
+memprediksi profil suhu dan menyelesaikan batas operasional keadaan
+tunak (\emph{steady-state}) secara 1-Dimensi. Pada perkembangan modern,
+perangkat lunak dengan komputasi masif seperti Sockeye yang dibangun di
+atas kerangka \emph{Multiphysics Object-Oriented Simulation Environment}
+(MOOSE) digunakan untuk simulasi transien yang menggabungkan aliran uap
+1D dan konduksi termal padatan 2D secara mekanistik. Keterbatasan
+fleksibilitas pada kode lawas serta mahalnya beban komputasi pada
+Sockeye mengindikasikan bahwa penyusunan skrip analitik yang mandiri
+(\emph{self-contained}) dan efisien menggunakan bahasa pemrograman
+Python sangat dibutuhkan untuk analisis desain awal
+
+Sebagai alternatif pengembangan instrumen analisis, studi terkini yang
+mengandalkan bahasa pemrograman tingkat tinggi untuk pemodelan reaktor
+KRUSTY telah dilakukan oleh Zhang dkk. dengan menggunakan perangkat
+MATLAB/Simulink. Mereka mengembangkan lingkungan pemodelan multi-domain
+yang mengintegrasikan dinamika reaktor titik dan modul perpindahan panas
+pipa kalor untuk mengevaluasi operasi transien reaktor. Validasi alat
+komputasi tersebut terhadap data eksperimen KRUSTY menunjukkan galat
+suhu yang berada di bawah 3\% pada sebagian besar tahapan operasi,
+membuktikan keandalan pemrograman matematika untuk simulasi reaktor.
+Senada dengan hal tersebut, Guo dkk. juga mensimulasikan distribusi suhu
+teras KRUSTY melalui pengembangan \emph{Super Thermal Conductivity
+Model} (STCM) di mana transportasi uap di dalam pipa disederhanakan
+menjadi model jaringan hambatan termal.
+
+Keseluruhan literatur di atas mengukuhkan landasan bagi penelitian
+skripsi ini. Eksperimen KRUSTY menyediakan landasan data empiris yang
+terbukti sukses, sementara desain ISR menawarkan kasus aplikasi reaktor
+antariksa tingkat lanjut dengan daya lebih besar yang menuntut
+perancangan termal-hidrolik yang presisi. Dengan mengidentifikasi
+kesenjangan ketersediaan alat analisis pada kode-kode terdahulu seperti
+HTPIPE maupun perangkat berat seperti Sockeye, penelitian ini
+diposisikan untuk membangun model komputasi berbasis Python yang
+mengintegrasikan penyelesaian batas operasional dan evaluasi perpindahan
+kalor. Melalui komparasi dengan performa KRUSTY, model Python yang
+dihasilkan akan memiliki justifikasi yang valid sebelum diekstrapolasi
+untuk menguji kelayakan integrasi pipa kalor pada desain Reaktor
+Antariksa Indonesia (ISR).
+
+\section{\texorpdfstring{\textbf{BAB III} \textbf{DASAR
+TEORI}}{BAB III DASAR TEORI}}\label{bab-iii-dasar-teori}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item ~
+  \subsection{\texorpdfstring{\textbf{Prinsip Kesetimbangan Tekanan Pipa
+  Kalor}}{Prinsip Kesetimbangan Tekanan Pipa Kalor}}\label{prinsip-kesetimbangan-tekanan-pipa-kalor}
+\end{enumerate}
+
+Untuk mempertahankan transportasi panas pada kondisi tunak
+(\emph{steady-state}), sebuah pipa kalor harus memenuhi kriteria
+kesetimbangan tekanan dinamis global. Proses penguapan yang terjadi di
+bagian evaporator menghasilkan gradien tekanan yang mendorong uap
+mengalir secara aksial menuju kondensor. Di bagian kondensor, uap
+melepaskan panas latennya, berubah fase menjadi cairan, dan ditarik
+kembali menuju evaporator oleh gaya pompa kapiler (\emph{capillary
+pumping head}) yang dihasilkan oleh struktur sumbu berpori (\emph{wick})
+
+Selama sirkulasi tersebut, fluida kerja mengalami gaya gesek
+(\emph{frictional forces}) baik pada fase uap maupun cairan. Agar
+sirkulasi fluida tidak terputus dan fenomena kekeringan (\emph{dryout})
+pada evaporator dapat dihindari, tekanan kapiler maksimum yang mampu
+dihasilkan oleh sumbu (\(\Delta {P}_{max,cap}\)) harus lebih besar atau
+sama dengan total penurunan tekanan di seluruh sistem:
+
+\href{https://www.codecogs.com/eqnedit.php?latex=\%5CDelta\%7B\%7DP_\%7Bcap\%2Cmax\%7D\%5Cgeq\%7B\%7D\%5CDelta\%7B\%7DP_\%7Bv\%7D\%2B\%5CDelta\%7B\%7DP_\%7Bl\%7D\%2B\%5CDelta\%7B\%7DP_\%7Bg\%7D\#0}{}
+
+Dengan \(\Delta {P}_{v}\) adalah penurunan tekanan aliran uap,
+\(\Delta {P}_{l}\) adalah penurunan tekanan cairan di dalam sumbu, dan
+\(\Delta {P}_{g}\) adalah kerugian tekanan hidrostatik akibat gravitasi.
+
+Gaya pompa kapiler maksimum itu sendiri dievaluasi menggunakan persamaan
+Young yang bergantung pada tegangan permukaan fluida \(\sigma\), sudut
+kontak \(\theta\), dan radius pori efektif sumbu \({r}_{c}\):
+
+\href{https://www.codecogs.com/eqnedit.php?latex=\%5CDelta\%7B\%7DP_\%7Bcap\%2Cmax\%7D\%3D\%5Cfrac\%7B2\%5Csigma\%7B\%7D\%5Ccos\%7B\%5Ctheta\%7B\%7D\%7D\%7D\%7Br_\%7Bc\%7D\%7D\#0}{}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\item ~
+  \subsection{\texorpdfstring{\textbf{Pemodelan Penurunan
+  Tekanan}}{Pemodelan Penurunan Tekanan}}\label{pemodelan-penurunan-tekanan}
+\end{enumerate}
+
+Aliran cairan yang kembali melalui struktur sumbu berpori dimodelkan
+sebagai aliran laminar. Dengan memanfaatkan Hukum Darcy untuk media
+berpori yang diintegrasikan sepanjang pipa kalor, total penurunan
+tekanan cairan, \(\Delta {P}_{l}\) dapat diekspresikan sebagai fungsi
+dari laju perpindahan kalor (\(Q\)) menggunakan hukum Darcy:
+
+\href{https://saxarona.github.io/mathjax-viewer/?input=\%5CDelta\%7B\%7DP_\%7Bl\%7D\%3D\%5Cfrac\%7B\%5Cmu_\%7Bl\%7Dl_\%7Beff\%7DQ\%7D\%7B\%5Crho\%7B\%7D_\%7Bl\%7DKA_\%7Bw\%7Dh_\%7Bfg\%7D\%7D\#0}{}
+
+Di mana
+
+\begin{itemize}
+\item
+  \emph{\({\mu }_{l}\)} adalah viskositas dinamis cairan (Pa·s)
+\item
+  \({\rho }_{l}\) adalah densitas cairan (kg/m3)
+\item
+  \({h}_{fg}\) adalah kalor laten penguapan (J/kg)
+\item
+  \({A}_{w}\) adalah luas penampang melintang struktur sumbu (m2)
+\item
+  \(K\) merupakan permeabilitas hidrolik dari sumbu tersebut (m2)
+\end{itemize}
+
+Variabel \({l}_{eff}\) adalah panjang efektif pipa kalor yang
+memperhitungkan distribusi spasial dari penguapan dan kondensasi,
+dirumuskan dengan:
+
+\href{https://www.codecogs.com/eqnedit.php?latex=l_\%7Beff\%7D\%3D0.5l_e\%2Bl_a\%2B0.5l_c\#0}{}
+
+Di mana \({l}_{e}\), \({l}_{a}\), dan \({l}_{c}\) secara berturut-turut
+merupakan panjang area evaporator, adiabatik, dan kondensor.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\item ~
+  \subsection{\texorpdfstring{\textbf{Batasan Kerja Termal-Hidrolik
+  (\emph{Operational
+  Limits})}}{Batasan Kerja Termal-Hidrolik (Operational Limits)}}\label{batasan-kerja-termal-hidrolik-operational-limits}
+\end{enumerate}
+
+Dalam pengoperasian pipa kalor, laju perpindahan kalor maksimum yang
+dapat dicapai dibatasi oleh interaksi dinamika fluida dan termodinamika
+fase cair-uap di dalamnya.
+
+Karakteristik limitasi ini bervariasi bergantung pada geometri pipa,
+sifat termofisika fluida kerja, struktur sumbu kapiler (wick), serta
+temperatur operasi. Kegagalan operasional atau penurunan drastis laju
+perpindahan kalor terjadi apabila salah satu batas hidrodinamika atau
+termal terlampaui. Secara umum, limitasi kerja termal-hidrolik pada pipa
+kalor mencakup batasan viskos, sonik, \emph{entrainment}, kapiler, dan
+pendidihan, yang masing-masing dijabarkan sebagai berikut.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item ~
+  \subsubsection{\texorpdfstring{\textbf{Batasan
+  Viskos}}{Batasan Viskos}}\label{batasan-viskos}
+\end{enumerate}
+
+Batas viskos sangat relevan ketika reaktor antariksa baru mulai
+dihidupkan (startup) dari keadaan dingin atau beku. Pada suhu operasi
+yang sangat rendah, tekanan uap berada pada kondisi yang sangat kecil
+sehingga gaya viskos (gesekan internal fluida) menjadi dominan. Batas
+viskos terjadi apabila gaya gesek viskos uap mengalahkan gradien tekanan
+yang dihasilkan oleh proses penguapan, sehingga uap mengalami stagnasi
+dan aliran sirkulasi tidak dapat berlangsung. Dengan mengasumsikan uap
+gas ideal pada aliran satu dimensi, aliran inkompresibel, serta beban
+penguapan dan kondensasi yang seragam, batas daya viskos (\({Q}_{vis}\))
+dapat diprediksi melalui persamaan:
+
+\href{https://saxarona.github.io/mathjax-viewer/?input=Q_\%7Bvis\%7D\%3D\%5Cfrac\%7BA_\%7Bv\%7Dr_\%7Bv\%7D\%5E2h_\%7Bfg\%7D\%5Crho_\%7Bv\%7DP_\%7Bv\%7D\%7D\%7B16\%5Cmu_\%7Bv\%7Dl_\%7Beff\%7D\%7D\#0}{}
+
+di mana
+
+\begin{itemize}
+\item
+  \({A}_{v}\) adalah luas penampang inti uap (m2)\\
+\item
+  \({r}_{v}\) adalah radius ruang uap (m)\\
+\item
+  \({h}_{fg}\) adalah kalor laten penguapan (J/kg)\\
+\item
+  \({\rho }_{v}\) adalah densitas uap saturasi (kg/m3)\\
+\item
+  \({P}_{v}\) adalah tekanan uap saturasi (Pa)\\
+\item
+  \({\mu }_{v}\) adalah viskositas dinamis uap (Pa·s)\\
+\item
+  \({l}_{eff}\) adalah panjang efektif pipa kalor (m)
+
+  2. \#\#\# \textbf{Batasan Sonik}
+\end{itemize}
+
+Batas sonik tercapai apabila kecepatan aliran uap di ujung pintu keluar
+evaporator menyamai kecepatan suara lokal (\(M=1\)), sehingga
+menyebabkan terjadinya fenomena aliran tercekik (\emph{choked flow}).
+Berdasarkan model aliran inersia satu dimensi, kapasitas perpindahan
+kalor tercekik maksimum (\({Q}_{sonic}\)) dirumuskan sebagai:
+
+\href{https://saxarona.github.io/mathjax-viewer/?input=Q_\%7Bsonic\%7D\%3DA_v\%5Crho\%7B\%7D_vh_\%7Bfg\%7D\%5Cleft\%5B\%5Cfrac\%7B\%5Cgamma\%7B\%7DR_vT_v\%7D\%7B2(\%5Cgamma\%2B1)\%7D\%5Cright\%5D\%5E\%7B0.5\%7D\#0}{}
+
+di mana
+
+\begin{itemize}
+\tightlist
+\item
+  \({A}_{v}\) adalah luas penampang inti uap (m²)\\
+\item
+  \({\rho }_{v}\) adalah densitas uap saturasi (kg/m³)\\
+\item
+  \({h}_{fg}\) adalah kalor laten penguapan (J/kg)\\
+\item
+  \(\gamma\) adalah rasio kapasitas kalor (tanpa satuan,
+  \({c}_{p}/{c}_{v}\))\\
+\item
+  \({R}_{v}\) adalah konstanta gas spesifik uap (J/(kg·K))\\
+\item
+  \({T}_{v}\) adalah suhu uap saturasi evaporator (K)
+\end{itemize}
+
+Melampaui batas ini tidak selalu menyebabkan kerusakan permanen pada
+pipa kalor seperti halnya batas pendidihan, melainkan akan membatasi
+kemampuan efisiensi perpindahan kalor hingga suhu evaporator meningkat
+dan tekanan uap naik cukup tinggi untuk keluar dari rezim sonik.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\item ~
+  \subsubsection{\texorpdfstring{\textbf{Batasan
+  Entrainment}}{Batasan Entrainment}}\label{batasan-entrainment}
+\end{enumerate}
+
+Di dalam pipa kalor, cairan mengalir melalui struktur sumbu kapiler
+secara berlawanan arah terhadap aliran uap berkecepatan tinggi pada inti
+ruang uap. Interaksi antara kedua fase aliran ini menimbulkan gaya geser
+yang signifikan pada antarmuka cair-uap. Batasan \emph{entrainment}
+tercapai apabila gaya geser uap melampaui gaya tegangan permukaan
+cairan, sehingga butiran cairan terlepas dari struktur sumbu, ikut
+terbawa oleh aliran uap, dan terakumulasi di area kondensor. Fenomena
+ini dianalisis menggunakan rasio antara gaya inersia uap terhadap gaya
+tegangan permukaan yang dinyatakan melalui bilangan Weber (Weber
+number). Kapasitas perpindahan kalor maksimum akibat fenomena
+entrainment (\({Q}_{e}\)) dirumuskan sebagai berikut:
+
+\href{https://saxarona.github.io/mathjax-viewer/?input=Q_e\%3DA_vh_\%7Bfg\%7D\%5Cleft\%5B\%5Cfrac\%7B\%5Csigma\%7B\%7D\%5Crho_v\%7D\%7B2r_h\%7D\%5Cright\%5D\%5E\%7B0.5\%7D\#0}{}
+
+dengan
+
+\begin{itemize}
+\item
+  \({A}_{v}\) adalah luas penampang ruang uap (m²)\\
+\item
+  \({h}_{fg}\) adalah kalor laten penguapan (J/kg)\\
+\item
+  \(\sigma\) adalah tegangan permukaan cairan (N/m)\\
+\item
+  \({\rho }_{v}\) adalah densitas uap saturasi (kg/m³)\\
+\item
+  \({r}_{h}\) adalah radius hidrolik \emph{wick} sumbu kapiler (m)
+
+  4. \#\#\# \textbf{Batasan Pendidihan}
+
+  Berbeda dengan batasan operasional lainnya yang membatasi fluks panas
+  aksial, batas pendidihan membatasi fluks panas secara radial pada
+  evaporator. Jika fluks panas radial yang diterima dinding evaporator
+  terlalu ekstrem, gradien suhu konduksi melintasi struktur sumbu dan
+  cairan akan memicu kondisi \emph{superheat}. Hal ini menyebabkan
+  terjadinya pendidihan nukleat di dalam struktur sumbu, sehingga
+  gelembung uap yang terbentuk akan menghambat pasokan balik cairan
+  kapiler dan memicu dryout lokal serta lonjakan suhu atau
+  \emph{hotspot} pada teras reaktor. Kapasitas perpindahan kalor
+  maksimum untuk mencegah fenomena batas pendidihan (\({Q}_{b}\))
+  ditentukan berdasarkan pendekatan nukleasi gelembung uap:
+\end{itemize}
+
+\href{https://saxarona.github.io/mathjax-viewer/?input=Q_b\%3D\%5Cfrac\%7B2\%5Cpi\%7B\%7Dl_ek_\%7Beff\%7DT_v\%7D\%7Bh_\%7Bfg\%7D\%5Crho_\%7Bv\%7D\%5Cln(r_i\%2Fr_v)\%7D\%5Cleft\%5B\%5Cfrac\%7B2\%5Csigma\%7B\%7D\%7D\%7Br_n\%7D-P_c\%5Cright\%5D\#0}{}
+
+di mana
+
+\begin{itemize}
+\tightlist
+\item
+  \({l}_{e}\) adalah panjang evaporator (m)\\
+\item
+  \({k}_{eff}\) adalah konduktivitas termal efektif sumbu (W/(m·K))\\
+\item
+  \({T}_{v}\) adalah suhu uap (K)\\
+\item
+  \(\sigma\) adalah tegangan permukaan (N/m)\\
+\item
+  \({h}_{fg}\) adalah kalor laten penguapan (J/kg)\\
+\item
+  \({\rho }_{v}\) adalah densitas uap (kg/m³)\\
+\item
+  \({r}_{i}\) adalah radius dalam pipa (m)\\
+\item
+  \({r}_{v}\) adalah radius inti uap (m)\\
+\item
+  \({r}_{n}\) adalah radius nukleasi gelembung kritis (m)\\
+\item
+  \({P}_{c}\) adalah tekanan kapiler lokal (Pa)\\
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \textbf{Sifat Termofisik Natrium Cair}
+\end{enumerate}
+
+Mengingat semua perhitungan kerugian tekanan dan batas operasional
+sangat bergantung pada kondisi fluida, pemodelan komputasi memerlukan
+persamaan termofisik yang akurat. Sifat termofisik natrium jenuh
+berwujud sangat non-linear terhadap perubahan suhu operasi. Berdasarkan
+korelasi empiris dari \emph{Argonne National Laboratory}, densitas
+cairan natrium (\({\rho }_{l}\)) dalam kg/m3 dari rentang titik lelehnya
+hingga 1644 K dihitung melalui polinomial:
+
+\href{https://www.codecogs.com/eqnedit.php?latex=\%5Crho\%7B\%7D_l\%3D1011.8-0.22054T-1.9226\%5Ctimes\%7B\%7D10\%5E\%7B-5\%7DT\%5E2\%2B5.6371\%5Ctimes\%7B\%7D10\%5E\%7B-9\%7DT\%5E3\#0}{}
+
+Sementara itu, tegangan permukaan (\(\sigma\)) dalam satuan N/m, yang
+menjadi parameter penentu daya pompa kapiler, dimodelkan menggunakan
+persamaan linear
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  \textbf{Analisis Jaringan Hambatan Termal}
+\end{enumerate}
+
+Untuk mengevaluasi profil penurunan suhu di sepanjang pipa kalor (dari
+luar dinding evaporator hingga luar dinding kondensor), penelitian ini
+mengadopsi pemodelan jaringan hambatan termal (thermal resistance
+network). Pendekatan ini menganalogikan aliran panas dengan sirkuit
+listrik. Total resistansi termal merupakan kombinasi perhitungan
+hambatan secara seri dan paralel, yang secara umum terdiri atas sembilan
+hambatan: hambatan konduksi arah radial di dinding dan sumbu pada area
+evaporator, batas antarmuka transisi fase cair-uap, hambatan aliran uap
+di zona adiabatik, serta resistansi arah radial di sumbu dan dinding
+kondensor. Dengan menyusun rangkaian ini dalam pemrograman Python,
+gradien suhu aktual untuk fluks beban dari reaktor dapat disimulasikan
+
+\textbf{BAB IV}\\
+\textbf{PELAKSANAAN PENELITIAN}
+
+LOREM IPSUM
+
+\textbf{BAB V}\\
+\textbf{HASIL DAN PEMBAHASAN}
+
+LOREM IPSUM
+
+\textbf{BAB VI}\\
+\textbf{KESIMPULAN DAN SARAN}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Kesimpulan}
+\end{enumerate}
+
+LOREM IPSUM
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  \textbf{Saran}
+\end{enumerate}
+
+LOREM IPSUM
+
+\textbf{DAFTAR PUSTAKA}
+
+\href{https://www.zotero.org/google-docs/?cab6zL}{{[}1{]}}
+\href{https://www.zotero.org/google-docs/?cab6zL}{P. R. McClure, D. I.
+Poston, M. A. Gibson, L. S. Mason, and R. C. Robinson, `Kilopower
+Project: The KRUSTY Fission Power Experiment and Potential Missions',
+\emph{Nucl. Technol.}, vol.~206, no. sup1, pp.~S1--S12, Jun.~2020, doi:
+10.1080/00295450.2020.1722554.}
+
+\href{https://www.zotero.org/google-docs/?cab6zL}{{[}2{]}}
+\href{https://www.zotero.org/google-docs/?cab6zL}{D. Beard, C. Tarau,
+and W. G. Anderson, `Sodium Heat Pipes for Space and Surface Fission
+Power', in \emph{15th International Energy Conversion Engineering
+Conference}, Atlanta, GA: American Institute of Aeronautics and
+Astronautics, Jul.~2017. doi: 10.2514/6.2017-5087.}
+
+\href{https://www.zotero.org/google-docs/?cab6zL}{{[}3{]}}
+\href{https://www.zotero.org/google-docs/?cab6zL}{H. Jouhara, D. A.
+Reay, R. J. McGlen, P. Kew, and J. McDonough, \emph{Heat Pipes: theory,
+design and applications}, Seventh edition. Oxford Cambridge, MA:
+Butterworth-Heinemann, an imprint of Elsevier, 2024.}
+
+\end{document}
